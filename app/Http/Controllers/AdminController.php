@@ -5,15 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+
 class AdminController extends Controller
 {
-    public function AdminLogin(){
+    public function AdminLogin()
+    {
         return view('admin.login');
     }
-    public function AdminDashboard(){
+    public function AdminDashboard()
+    {
         return view('admin.admin_dashboard');
     }
-    public function AdminLoginSubmit(Request $request){
+    public function AdminLoginSubmit(Request $request)
+    {
 
         $request->validate([
             'email' => 'required|email',
@@ -32,11 +36,18 @@ class AdminController extends Controller
 
         // 認証成功時
         return redirect()->route('admin.dashboard')->with('success', 'ログインに成功しました');
-
     }
 
-    public function AdminLogout(){
+    public function AdminLogout()
+    {
         Auth::guard('admin')->logout();
-        return redirect()->route('admin.login')->with('success','ログアウトしました');
+        return redirect()->route('admin.login')->with('success', 'ログアウトしました');
     }
+
+    public function AdminForgetPassword()
+    {
+        return view('admin.forget_password');
+    }
+
+    public function AdminPasswordSubmit(Request $request) {}
 }

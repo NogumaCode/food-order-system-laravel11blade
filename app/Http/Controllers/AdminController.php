@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Mail\Websitemail;
 use App\Models\Admin;
+use App\Rules\ContainsLetter;
+use App\Rules\ContainsNumber;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 
@@ -23,20 +25,28 @@ class AdminController extends Controller
     public function AdminLoginSubmit(Request $request)
     {
 
+        // バリデーション処理
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => [
+                'required',
+                'string',
+                'min:7',
+                new ContainsLetter,
+                new ContainsNumber,
+            ],
         ]);
 
-        $data = [
-            'email' => $request->email,
-            'password' => $request->password,
-        ];
+        // ログインデータ
+        $credentials = $request->only('email', 'password');
 
-        if (!Auth::guard('admin')->attempt($request->only('email', 'password'))) {
-            // 認証失敗時
+        // 認証を試みる
+        if (!Auth::guard('admin')->attempt($credentials)) {
             return back()->withErrors(['email' => 'メールアドレスまたはパスワードが間違っています'])->withInput();
         }
+
+        // セッション固定攻撃を防止
+        $request->session()->regenerate();
 
         // 認証成功時
         return redirect()->route('admin.dashboard')->with('success', 'ログインに成功しました');
@@ -61,21 +71,78 @@ class AdminController extends Controller
 
         $admin_data = Admin::where('email', $request->email)->first();
 
-        $token = Str::random(64);
-        $admin_data->token = Hash::make($token); // データベースに保存する際にハッシュ化
+        // 平文トークンを生成
+        $plain_token = Str::random(64);
+
+        // ハッシュ化して保存
+        $admin_data->token = Hash::make($plain_token);
+        $admin_data->token_created_at = now();
         $admin_data->update();
-        $reset_link = url('admin/reset-password/' . $token);
+
+        // リセットリンクに平文トークンを使用
+        $reset_link = url('admin/reset_password/' . $plain_token);
         $subject = "パスワードのリセット";
 
         try {
-            // メールを送信
             Mail::to($request->email)->send(new Websitemail($subject, $reset_link));
         } catch (\Exception $e) {
-            // エラーをログに記録
             \Log::error('メール送信エラー: ' . $e->getMessage());
             return redirect()->back()->with('error', 'メールの送信中にエラーが発生しました。');
         }
 
         return redirect()->back()->with('success', 'パスワードリセットメールをメールアドレスに送信しました。');
+    }
+
+    public function AdminResetPassword($token)
+    {
+        // トークンがある管理者を取得
+        $admin_data = Admin::where('token', '!=', null)->where('token_created_at', '>=', now()->subMinutes(30))->first();
+
+        // トークンが一致するか検証
+        if (!$admin_data || !Hash::check($token, $admin_data->token)) {
+            return redirect()->route('admin.login')->with('error', '認証が異なっております');
+        }
+
+        // トークンの有効期限を確認
+        if ($admin_data->token_created_at < now()->subMinutes(30)) {
+            return redirect()->route('admin.login')->with('error', 'トークンの有効期限が切れています');
+        }
+
+        return view('admin.reset_password', compact('token'));
+    }
+    public function AdminResetPasswordSubmit(Request $request)
+    {
+        $request->validate([
+            'password' => [
+                'required',
+                'string',
+                'min:7',
+                new ContainsLetter,
+                new ContainsNumber,
+            ],
+            'password_confirmation' => 'required|same:password',
+        ]);
+
+        $admin_data = Admin::where('token', '!=', null)->where('token_created_at', '>=', now()->subMinutes(30))->first();
+
+        // トークンの存在を確認
+        if (!$admin_data || !Hash::check($request->token, $admin_data->token)) {
+            return redirect()->route('admin.login')->with('error', 'トークンが無効です');
+        }
+        // トークンの有効期限を確認
+        if ($admin_data->token_created_at < now()->subMinutes(30)) {
+            return redirect()->route('admin.login')->with('error', 'トークンの有効期限が切れています');
+        }
+        // パスワードを更新
+        $admin_data->password = Hash::make($request->password);
+        // トークンを無効化
+        $admin_data->token = null;
+        $admin_data->token_created_at = null;
+
+        // データベースを更新
+        $admin_data->update();
+
+        // ログインフォームにリダイレクト
+        return redirect()->route('admin.login')->with('success', 'パスワードをリセットしました');
     }
 }

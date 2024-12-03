@@ -20,7 +20,7 @@ class AdminController extends Controller
     }
     public function AdminDashboard()
     {
-        return view('admin.admin_dashboard');
+        return view('admin.index');
     }
     public function AdminLoginSubmit(Request $request)
     {
@@ -31,7 +31,7 @@ class AdminController extends Controller
             'password' => [
                 'required',
                 'string',
-                'min:7',
+                'min:8',
                 new ContainsLetter,
                 new ContainsNumber,
             ],
@@ -80,7 +80,7 @@ class AdminController extends Controller
         $admin_data->update();
 
         // リセットリンクに平文トークンを使用
-        $reset_link = url('admin/reset_password/' . $plain_token);
+        $reset_link = route('admin.reset_password', ['token' => $plain_token]);
         $subject = "パスワードのリセット";
 
         try {
@@ -96,16 +96,13 @@ class AdminController extends Controller
     public function AdminResetPassword($token)
     {
         // トークンがある管理者を取得
-        $admin_data = Admin::where('token', '!=', null)->where('token_created_at', '>=', now()->subMinutes(30))->first();
+        $admin_data = Admin::whereNotNull('token')
+        ->where('token_created_at', '>=', now()->subMinutes(30))
+        ->first();
 
         // トークンが一致するか検証
         if (!$admin_data || !Hash::check($token, $admin_data->token)) {
             return redirect()->route('admin.login')->with('error', '認証が異なっております');
-        }
-
-        // トークンの有効期限を確認
-        if ($admin_data->token_created_at < now()->subMinutes(30)) {
-            return redirect()->route('admin.login')->with('error', 'トークンの有効期限が切れています');
         }
 
         return view('admin.reset_password', compact('token'));

@@ -25,7 +25,7 @@ Route::post('/admin/logout', [AdminController::class, 'AdminLogout'])->name('adm
 Route::post('/admin/login_submit', [AdminController::class, 'AdminLoginSubmit'])->name('admin.login_submit')->middleware('throttle:3,1');
 Route::get('/admin/forget_password', [AdminController::class, 'AdminForgetPassword'])->name('admin.forget_password');
 Route::post('/admin/password_submit', [AdminController::class, 'AdminPasswordSubmit'])->name('admin.password_submit');
-Route::get('/admin/reset_password/{token}', [AdminController::class, 'AdminResetPassword'])->middleware('signed');
+Route::get('/admin/reset_password/{token}', [AdminController::class, 'AdminResetPassword'])->name('admin.reset_password');
 Route::post('/admin/reset_password_submit', [AdminController::class, 'AdminResetPasswordSubmit'])->name('admin.reset_password_submit');
 Route::middleware('admin')->group(function () {
 Route::get('/admin/dashboard', [AdminController::class, 'AdminDashboard'])->name('admin.dashboard');

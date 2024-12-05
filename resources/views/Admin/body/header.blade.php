@@ -9,7 +9,7 @@
                     </span>
                     <span class="logo-lg">
                         <img src="assets/images/logo-sm.svg" alt="" height="24"> <span
-                            class="logo-txt">Minia</span>
+                            class="logo-txt">DELIVE 管理画面</span>
                     </span>
                 </a>
 
@@ -19,7 +19,7 @@
                     </span>
                     <span class="logo-lg">
                         <img src="assets/images/logo-sm.svg" alt="" height="24"> <span
-                            class="logo-txt">Minia</span>
+                            class="logo-txt">フードデリバリー</span>
                     </span>
                 </a>
             </div>
@@ -62,10 +62,10 @@
                 </div>
             </div>
 
-            <div class="dropdown d-none d-sm-inline-block">
+            {{-- <div class="dropdown d-none d-sm-inline-block">
                 <button type="button" class="btn header-item" data-bs-toggle="dropdown" aria-haspopup="true"
                     aria-expanded="false">
-                    <img id="header-lang-img" src="assets/images/flags/us.jpg" alt="Header Language"
+                    <img id="header-lang-img" src="{{ asset('backend/assets/images/flags/us.jpg') }}" alt="Header Language"
                         height="16">
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
@@ -99,7 +99,7 @@
                             height="12"> <span class="align-middle">Russian</span>
                     </a>
                 </div>
-            </div>
+            </div> --}}
 
             <div class="dropdown d-none d-sm-inline-block">
                 <button type="button" class="btn header-item" id="mode-setting-btn">
@@ -108,7 +108,7 @@
                 </button>
             </div>
 
-            <div class="dropdown d-none d-lg-inline-block ms-1">
+            {{-- <div class="dropdown d-none d-lg-inline-block ms-1">
                 <button type="button" class="btn header-item" data-bs-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
                     <i data-feather="grid" class="icon-lg"></i>
@@ -158,7 +158,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             <div class="dropdown d-inline-block">
                 <button type="button" class="btn header-item noti-icon position-relative"
@@ -275,7 +275,7 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
                     <!-- プロフィール -->
-                    <a class="dropdown-item" href="{{ asset('backend/apps-contacts-profile.html') }}">
+                    <a class="dropdown-item" href="{{ route('admin.profile') }}">
                         <i class="mdi mdi mdi-face-man font-size-16 align-middle me-1"></i> プロフィール
                     </a>
                     <!-- ロックスクリーン -->

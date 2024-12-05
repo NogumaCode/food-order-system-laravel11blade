@@ -27,6 +27,7 @@ Route::get('/admin/forget_password', [AdminController::class, 'AdminForgetPasswo
 Route::post('/admin/password_submit', [AdminController::class, 'AdminPasswordSubmit'])->name('admin.password_submit');
 Route::get('/admin/reset_password/{token}', [AdminController::class, 'AdminResetPassword'])->name('admin.reset_password');
 Route::post('/admin/reset_password_submit', [AdminController::class, 'AdminResetPasswordSubmit'])->name('admin.reset_password_submit');
-Route::middleware('admin')->group(function () {
-Route::get('/admin/dashboard', [AdminController::class, 'AdminDashboard'])->name('admin.dashboard');
+Route::middleware('admin')->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'AdminDashboard'])->name('admin.dashboard');
+    Route::get('/profile', [AdminController::class, 'AdminProfile'])->name('admin.profile');
 });

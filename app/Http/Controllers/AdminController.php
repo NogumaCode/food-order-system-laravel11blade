@@ -142,4 +142,19 @@ class AdminController extends Controller
         // ログインフォームにリダイレクト
         return redirect()->route('admin.login')->with('success', 'パスワードをリセットしました');
     }
+
+    public function AdminProfile(){
+        $id = Auth::guard('admin')->id();
+        if (!$id) {
+            return redirect()->route('admin.login')->with('error', 'セッションが切れました。ログインしてください。');
+        }
+
+        $profileData = Admin::find($id);
+
+        if (!$profileData) {
+            return redirect()->route('admin.dashboard')->with('error', 'プロフィールデータが見つかりません。');
+        }
+
+        return view('admin.admin_profile', compact('profileData'));
+        }
 }
